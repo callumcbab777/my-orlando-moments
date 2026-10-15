@@ -8,6 +8,7 @@
 <meta name="robots" content="noindex">
 <link rel="icon" href="assets/ambar-logo.png">
 <link rel="stylesheet" href="assets/fonts/fonts.css">
+<link rel="stylesheet" href="assets/vendor/leaflet.css">
 <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
@@ -18,13 +19,24 @@
     <div class="brandline"><span class="eyebrow">Your buyer portal</span><h1>My Orlando</h1></div>
   </div>
   <nav class="wrap tabs" aria-label="My Orlando areas">
-    <button class="tab" disabled>Explore <small>the map · coming soon</small></button>
-    <button class="tab" disabled>Saved <small>coming soon</small></button>
-    <button class="tab active" aria-current="page">Moments</button>
+    <a class="tab" href="#explore" data-tab="explore">Explore <small>Discover Orlando map</small></a>
+    <a class="tab" href="#saved" data-tab="saved">Saved <small>your pins</small></a>
+    <a class="tab active" href="#moments" data-tab="moments" aria-current="page">Moments <small>tell us about you</small></a>
   </nav>
 </header>
 
 <main>
+<section data-view="explore" hidden class="view-explore">
+  <div class="wrap ex-head"><p class="eyebrow">Explore</p><h2>Discover Orlando</h2><p class="lede-s">Your pinned places are highlighted. Tap any place to pin or unpin it.</p><p id="pin-count" class="hint"></p></div>
+  <div class="wrap"><div id="cat-filter" class="g-chips cat-filter" role="group" aria-label="Categories"></div></div>
+  <div class="wrap ex-grid"><div id="map" class="map" role="region" aria-label="Discover Orlando map"></div><div id="place-list" class="place-list"></div></div>
+  <p class="wrap hint map-foot">Place locations from OpenStreetMap. The AMBAR marker is shown for reference at street level.</p>
+</section>
+<section data-view="saved" hidden class="view-saved">
+  <div class="wrap ex-head"><p class="eyebrow">Saved</p><h2>Your pinned places</h2><p class="lede-s">Everything you’ve pinned, including the starter pins from Orlando Days. Unpin anything, any time.</p></div>
+  <div class="wrap"><div id="saved-list" class="saved-list"></div></div>
+</section>
+<div data-view="moments">
   <section class="hero wrap">
     <p class="eyebrow">Moments</p>
     <h2>Make Orlando yours, one moment at a time.</h2>
@@ -56,6 +68,7 @@
       <div id="sum-tools" class="sum-tools" hidden><span class="hint">Click into the text to edit it.</span><button class="btn ghost sm" id="sum-refresh">Rewrite from my answers</button><button class="btn primary sm" id="sum-print">Print or save as PDF</button></div></div>
     </div>
   </section>
+</div>
 </main>
 
 <footer class="foot">
@@ -76,6 +89,8 @@
   </article>
 </div>
 <div id="toast" class="toast" role="status"></div>
+<script src="assets/vendor/leaflet.js"></script>
+<script src="assets/js/places.js"></script>
 <script src="assets/js/data.js"></script>
 <script src="assets/js/app.js"></script>
 </body>

@@ -33,7 +33,7 @@ const M=[
  {p:"Tell us about the space you picture.",f:[{id:"space",t:"slider",l:"Compact and effortless",r:"Room to spread out"},{id:"sleeps",t:"stepper",label:"Sleeps how many",min:1,max:12,def:4}]},
  {p:"Which feels more like you?",h:"Three quick pairs. Go with your gut.",f:[{id:"pairs",t:"pairs",pairs:[[{v:"bright",l:"Bright and open",img:"x-bright"},{v:"eclectic",l:"Collected and characterful",img:"picture-it"}],[{v:"airy",l:"Soft and airy",img:"x-bcalm"},{v:"moody",l:"Calm and cocooning",img:"x-bbold"}],[{v:"crisp",l:"Crisp and classic",img:"x-kmodern"},{v:"rustic",l:"Warm and rustic",img:"x-krustic"}]]}]},
  {p:"Closer to the pool, or higher up?",f:[{id:"height",t:"slider",l:"Closer to the pool",r:"Higher up"}]},
- {p:"How do you picture your time there?",h:"Drag the point (or use arrow keys) to show how the time is shared.",f:[{id:"time",t:"tri",labels:["Me","Family and friends","Guests staying while we’re away"]}]}
+ {p:"How do you picture your time there?",h:"Slide each one to show us. Rough is perfect.",f:[{id:"t_us",t:"slider",label:"Just us",l:"Rarely",r:"Often",freq:true},{id:"t_ff",t:"slider",label:"Family and friends",l:"Rarely",r:"Often",freq:true},{id:"t_guests",t:"slider",label:"Guests staying while we’re away",l:"Rarely",r:"Often",freq:true}]}
  ]},
 {id:"on-your-mind",name:"On Your Mind",time:"about 3 minutes",invite:"Tell us what’s on your mind today.",desc:"Your questions and hesitations, and the one thing you’d ask us.",
  focus:"The questions and hesitations you have right now, and the one thing you’d most like to ask us.",reward:"Direct answers from our approved knowledge set to the things you flagged, plus a personal reply from your advisor to your one question.",

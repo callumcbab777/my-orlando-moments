@@ -1,6 +1,6 @@
 # My Orlando · Moments
 
-Internal concept demo (ABI Group / AMBAR Orlando) of the **My Orlando → Moments** area of the buyer portal: seven Moments, each a fillable, one-screen-at-a-time experience (tap cards, three-state chips, sliders, toggles, steppers, image picks, A/B pairs, season picker, triangle pad, voice-note text). Finishing a Moment adds its tile to the board and shows a templated "What you get" card; the Your Orlando panel writes an editable, printable summary. Answers live only in the viewer's browser (localStorage); "Reset demo" in the footer clears them. No AI calls, nothing is sent.
+Internal concept demo (ABI Group / AMBAR Orlando) of the **My Orlando → Moments** area of the buyer portal: seven Moments, each a fillable, one-screen-at-a-time experience (tap cards, three-state chips, sliders, toggles, steppers, image picks, A/B pairs, season picker, rarely-to-often sliders, voice-note text). Finishing a Moment adds its tile to the board and shows a templated "Made for you" card; finishing Orlando Days drops starter pins onto the Explore → Discover Orlando map (Leaflet, bundled; OpenStreetMap tiles need internet), also listed under Saved, where places can be pinned/unpinned; the Your Orlando panel writes an editable, printable summary. Answers live only in the viewer's browser (localStorage); "Reset demo" in the footer clears them. No AI calls, nothing is sent.
 
 Fully static and self-contained: fonts (Cormorant Garamond, DM Sans — SIL OFL), AMBAR logo and photos are bundled. No CDN, no tracking. Open `index.html` or serve the folder.
 
@@ -37,3 +37,9 @@ Fully static and self-contained: fonts (Cormorant Garamond, DM Sans — SIL OFL)
 | assets/img/x-spa.jpg | YHI Spa treatment room at Paradisus by Meliá Bali.jpg | Paradisus Bali | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:YHI_Spa_treatment_room_at_Paradisus_by_Meli%C3%A1_Bali.jpg |
 
 CC0 photos are Unsplash uploads mirrored on Wikimedia Commons. CC BY / CC BY-SA photos are resized/cropped for web; attribution also shown in the site footer / README. Picture It view and interior photos are generic samples, not AMBAR.
+
+## Palette (AMBAR brand)
+Olive #5A5A37, light green #989B74, brown #B37D50, light cream #F4EFE7, amber #FFA94A, dark #171717 / #010101 — from the custom properties in ambarorlando.com's CSS; forest #0F2D21 sampled from the AMBAR logo.
+
+## Map data
+Place coordinates from OpenStreetMap Nominatim (Oct 15 2026). AMBAR marker: 3251 Secret Lake Drive, Kissimmee (address from public listings); OSM has no house number, so the marker sits on Secret Lake Drive at street level (approximate). Map tiles © OpenStreetMap contributors.
