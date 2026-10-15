@@ -42,7 +42,7 @@
   <section class="wrap board-wrap" aria-labelledby="board-h">
     <div class="board-head">
       <div><p class="eyebrow">Your Orlando board</p><h2 id="board-h">The picture so far</h2></div>
-      <p class="board-note">Each Moment you share adds a tile here. Open any Moment and choose “Mark as shared” to see it fill in.</p>
+      <p class="board-note">Each Moment you share adds a tile here. Share a Moment and its tile appears here.</p>
     </div>
     <div id="board" class="board"></div>
   </section>
@@ -52,6 +52,8 @@
       <p class="eyebrow">All Moments</p>
       <h2>Your Orlando, on one page</h2>
       <p>Bring every Moment together into a shareable one-page <em>Your Orlando</em> summary — something to keep, and to pass to the people deciding with you.</p>
+      <div class="sum-page"><div id="sum-text" class="sum-text" aria-label="Your Orlando summary, editable"></div>
+      <div id="sum-tools" class="sum-tools" hidden><span class="hint">Click into the text to edit it.</span><button class="btn ghost sm" id="sum-refresh">Rewrite from my answers</button><button class="btn primary sm" id="sum-print">Print or save as PDF</button></div></div>
     </div>
   </section>
 </main>
@@ -60,7 +62,8 @@
   <div class="wrap">
     <p class="promise">Your advisor will already know what matters to you, so your first call skips the basics.</p>
     <p class="small">My Orlando · Moments — an internal concept demo by ABI Group for the AMBAR Orlando team. Not for distribution to buyers.</p>
-    <p class="small credits">Photos: Orlando skyline by JER3L1337 (CC BY 4.0); friends at dinner by PattayaPatrol (CC BY-SA 4.0); other photos by Evelyn Paris, Gabriel Ghnassia, Stephen Di Donato, Thought Catalog and Angelina Litvin via Unsplash (CC0), sourced from Wikimedia Commons.</p>
+    <p class="small"><a href="#" id="reset">Reset demo</a></p>
+    <p class="small credits">Photos: Orlando skyline by JER3L1337 (CC BY 4.0); friends at dinner by PattayaPatrol (CC BY-SA 4.0); other photos by Evelyn Paris, Gabriel Ghnassia, Stephen Di Donato, Thought Catalog and Angelina Litvin via Unsplash (CC0), sourced from Wikimedia Commons. Additional picker photos credited in the README.</p>
   </div>
 </footer>
 
@@ -69,22 +72,11 @@
   <article class="modal-card" role="dialog" aria-modal="true" aria-labelledby="m-title">
     <button class="close" data-close aria-label="Close">×</button>
     <div class="m-img"><img id="m-img" alt=""></div>
-    <div class="m-body">
-      <p class="eyebrow" id="m-time"></p>
-      <h3 id="m-title"></h3>
-      <p class="m-invite" id="m-invite"></p>
-      <h4>What it’s about</h4><p id="m-focus"></p>
-      <h4>How we might ask</h4><ul id="m-prompts" class="prompts"></ul>
-      <h4>What you get</h4><p id="m-reward"></p>
-      <p class="m-note" id="m-note"></p>
-      <div class="m-actions">
-        <button class="btn primary" id="m-share">Mark as shared</button>
-        <button class="btn ghost" id="m-edit">✎ Edit my answers</button>
-        <button class="btn link" data-close>Skip for now</button>
-      </div>
-    </div>
+    <div class="m-body" id="m-body" aria-live="polite"></div>
   </article>
 </div>
+<div id="toast" class="toast" role="status"></div>
+<script src="assets/js/data.js"></script>
 <script src="assets/js/app.js"></script>
 </body>
 </html>
