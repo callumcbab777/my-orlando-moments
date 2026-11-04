@@ -17,9 +17,10 @@ const MM=id=>M.find(m=>m.id===id);
 /* ---------- cards & board ---------- */
 function cards(){
   $("#cards").innerHTML=M.map(m=>`<article class="card${D.has(m.id)?" is-shared":""}" tabindex="0" role="button" data-id="${m.id}" aria-label="Open ${esc(m.name)}">
-    <div class="c-img"><img src="${IMG(m.id)}" alt="" loading="lazy"><span class="c-time">${m.time}</span>${m.note&&m.id==="your-visit"?`<span class="c-flag">${m.note}</span>`:""}</div>
+    <div class="c-img"${window.MoTiles?` data-tile="${m.id}"`:""}>${(r=>`<img src="${r.src}" alt="" loading="lazy" decoding="async" width="800" height="500"${r.x!=null?` style="--fx:${r.x}%;--fy:${r.y}%;--fz:${r.z}"`:""}>`)(window.MoTiles?MoTiles.roll(m.id):{src:IMG(m.id)})}<span class="c-time">${m.time}</span>${m.note&&m.id==="your-visit"?`<span class="c-flag">${m.note}</span>`:""}</div>
     <div class="c-body"><h3>${m.name}</h3><p class="c-invite">${m.invite}</p><p class="c-desc">${m.desc}</p>
     <div class="c-foot"><span class="c-open">${D.has(m.id)?"See what we made for you →":"Open moment →"}</span><button class="c-edit" data-edit="${m.id}" aria-label="Edit ${esc(m.name)}">✎ Edit</button></div></div></article>`).join("");
+  if(window.MoTiles) MoTiles.mount($("#cards"));
 }
 function board(){
   $("#board").innerHTML=M.map(m=>D.has(m.id)

@@ -4,6 +4,9 @@ Internal concept demo (ABI Group / AMBAR Orlando) of the **My Orlando → Moment
 
 Fully static and self-contained: fonts (Cormorant Garamond, DM Sans — SIL OFL), AMBAR logo and photos are bundled. No CDN, no tracking. Open `index.html` or serve the folder.
 
+## Landing Moment tiles — generative AMBAR mosaic
+`assets/js/tiles.js` gives each landing Moment tile its own visual on every visit: a different AMBAR rendering (shuffled from the eight AMBAR renderings in `assets/img`, no other imagery), a random crop and zoom, a palette pair from the AMBAR colours (amber only as a sparing accent), and one of four cell styles (tessera, halftone, quarter-arc, louvre) sampled from the rendering's own light and shade. A mosaic covers part of the rendering at rest; hover, keyboard focus or a tap dissolves it from the pointer, and scrolling a tile into view plays the first reveal. It is one small canvas per tile (capped at 2× pixel ratio), with lazy-loaded images and fixed image sizes so nothing shifts. With reduced motion on, states switch without animation. If a rendering fails to load, the tile draws an abstract brand-colour mosaic instead, and the tile still opens. With JavaScript off, static tiles with AMBAR renderings are shown. The question screens inside each Moment are unchanged.
+
 ## Image credits
 All images are colour-graded (warm, slightly desaturated) and resized for the web.
 
