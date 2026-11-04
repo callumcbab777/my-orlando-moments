@@ -90,6 +90,7 @@ Tile.prototype.mask=function(){
   });
 };
 Tile.prototype.to=function(state,origin,instant){
+  if(F.state!=="idle") return; // the completion view owns the tiles while it is showing
   this.state=state; var t=this, now=performance.now();
   var ox=origin?origin[0]:.5+(rand()-.5)*.6, oy=origin?origin[1]:.5+(rand()-.5)*.6;
   this.cells.forEach(function(c){c.from=c.val;c.to=c.target?c.target[state]:(state==="cover"?0:1);
@@ -102,6 +103,7 @@ Tile.prototype.to=function(state,origin,instant){
 };
 Tile.prototype.settle=function(){if(this.ok&&this.state==="cover"&&this.seen) this.to("rest");};
 Tile.prototype.draw=function(){
+  if(F.state!=="idle"&&this.fin) return this.finDraw(F.state==="done"?Infinity:performance.now()-F.t0);
   var x=this.ctx,d=this.dpr||1,r=this.r,cs=this.cs,D=hex(C[r.dark]),Lc=hex(C[r.light]),dk=C[r.dark],lt=C[r.light];
   if(!x||!cs) return; x.setTransform(d,0,0,d,0,0); x.clearRect(0,0,this.W,this.H); x.globalAlpha=.94;
   this.cells.forEach(function(c){
@@ -120,7 +122,144 @@ var live=[], io=window.IntersectionObserver?new IntersectionObserver(function(es
     else if(NOHOVER&&NOHOVER.matches&&t.ok&&t.state!=="open") t.to("open");}
   else if(!e.isIntersecting&&t.seen&&t.ok&&NOHOVER&&NOHOVER.matches) t.to("rest",null,true);});},{threshold:[0,.55]}):null;
 
-function mount(root){
+/* ---------- Completion view: once all seven Moments are shared ----------
+   The seven tiles become windows onto ONE AMBAR rendering (the aerial of the AMBAR site, assets/img/ambar-aerial.jpg).
+   Multi-column grids: rows are stacked edge to edge (card text removed), so the picture runs continuously across the grid.
+   Single column (phones): each tile is the next frame of one camera pan across the same rendering, top to bottom.
+   One wave, measured in that shared space, gathers every tile into a forest/cream tessera drawn from the aerial,
+   then dissolves it to reveal the picture; a few amber tesserae linger last. Reduced motion: final view, simple fade.
+   ?demo=complete previews it without touching stored answers. Replay re-runs it. */
+var AER="assets/img/ambar-aerial.jpg", FY=.5,
+    // Single column: a camera path across the aerial (fractions of the image), one view per tile, towers to lake to clubhouse.
+    PATH=[[.20,.30],[.36,.46],[.48,.30],[.62,.42],[.70,.57],[.72,.82],[.90,.80]], PATHW=.42, GATHER=560, HOLD=1150, SPREAD=900;
+var DEMO=/(?:^|[?&])demo=complete(?:&|$)/.test(location.search);
+var F={state:"idle",t0:0,img:null,ok:false,lay:null,raf:0,pending:false,complete:false,io:null,played:false};
+var clamp=function(v){return v<0?0:v>1?1:v};
+var ss={get:function(){try{return sessionStorage.getItem("mo-fin")==="1"}catch(e){return false}},
+  set:function(v){try{v?sessionStorage.setItem("mo-fin","1"):sessionStorage.removeItem("mo-fin")}catch(e){}}};
+function aerial(cb){
+  if(F.img){ if(F.img.complete) cb(); else F.img.addEventListener("load",cb,{once:true}),F.img.addEventListener("error",cb,{once:true}); return; }
+  F.img=new Image(); F.img.decoding="async";
+  F.img.onload=function(){F.ok=true;cb();}; F.img.onerror=function(){F.ok=false;cb();};
+  F.img.src=AER;
+}
+// Shared virtual space for all tiles, and the slice of the rendering each tile shows.
+function layout(){
+  var ts=live.filter(function(t){return t.W}); if(!ts.length) return null;
+  var R=ts.map(function(t){return t.box.getBoundingClientRect()}), rows=[], gap=26;
+  R.forEach(function(r,i){var row=null;rows.forEach(function(o){if(Math.abs(o.top-r.top)<4)row=o});
+    if(!row){row={top:r.top,h:0,items:[]};rows.push(row);} row.h=Math.max(row.h,r.height); row.items.push(i);});
+  rows.sort(function(a,b){return a.top-b.top});
+  var left=Math.min.apply(null,R.map(function(r){return r.left})), right=Math.max.apply(null,R.map(function(r){return r.right}));
+  var single=rows.every(function(r){return r.items.length===1}), V=[], VW, VH, O;
+  if(!single){var y=0;rows.forEach(function(row){row.items.forEach(function(i){V[i]={x:R[i].left-left,y:y,w:R[i].width,h:R[i].height}});y+=row.h+gap;});
+    VW=right-left; VH=y-gap; O=[VW/2,VH/2];}
+  else {var x=0;rows.forEach(function(row){var i=row.items[0];V[i]={x:x,y:0,w:R[i].width,h:R[i].height};x+=R[i].width+gap;VH=Math.max(VH||0,R[i].height);});
+    VW=x-gap; O=[0,VH/2];}
+  var iw=F.ok?F.img.naturalWidth:16, ih=F.ok?F.img.naturalHeight:9, s=Math.max(VW/iw,VH/ih), ox=(VW-iw*s)/2, oy=(VH-ih*s)*FY;
+  var md=Math.max(Math.hypot(O[0],O[1]),Math.hypot(VW-O[0],O[1]),Math.hypot(O[0],VH-O[1]),Math.hypot(VW-O[0],VH-O[1]));
+  ts.forEach(function(t,i){var v=V[i];t.fin={vx:v.x,vy:v.y,vw:v.w,vh:v.h,sx:(v.x-ox)/s,sy:(v.y-oy)/s,sw:v.w/s,sh:v.h/s};t.flum=null;
+    if(single&&F.ok){var k=rows.findIndex(function(r){return r.items[0]===i}),pt=PATH[Math.min(k,PATH.length-1)],sw=iw*PATHW,sh=Math.min(ih,sw*v.h/v.w);
+      t.fin.sw=sw;t.fin.sh=sh;t.fin.sx=Math.max(0,Math.min(iw-sw,pt[0]*iw-sw/2));t.fin.sy=Math.max(0,Math.min(ih-sh,pt[1]*ih-sh/2));}});
+  F.lay={O:O,md:md||1,mode:single?"pan":"grid"};
+  var g0=document.getElementById("cards"); if(g0) g0.dataset.finLayout=F.lay.mode;
+  return F.lay;
+}
+// Per tile: cached slice of the rendering at tile size, and its luminance per mosaic cell.
+Tile.prototype.finPrep=function(){
+  if(!this.fin||!this.W||!this.cs) return;
+  var f=this.fin, W=this.W, H=this.H, d=this.dpr||1, cs=this.cs, cols=Math.ceil(W/cs), rows=Math.ceil(H/cs), n=cols*rows, i;
+  this.flum=new Array(n);
+  if(F.ok){
+    var bg=document.createElement("canvas"); bg.width=Math.round(W*d); bg.height=Math.round(H*d);
+    bg.getContext("2d").drawImage(F.img,f.sx,f.sy,f.sw,f.sh,0,0,bg.width,bg.height); this.fbg=bg;
+    try{var o=document.createElement("canvas");o.width=cols;o.height=rows;var x=o.getContext("2d");x.drawImage(F.img,f.sx,f.sy,f.sw,f.sh,0,0,cols,rows);
+      var px=x.getImageData(0,0,cols,rows).data;for(i=0;i<n;i++)this.flum[i]=(.2126*px[i*4]+.7152*px[i*4+1]+.0722*px[i*4+2])/255;}
+    catch(e){for(i=0;i<n;i++)this.flum[i]=this.cells[i]?this.cells[i].l:.5;}
+  } else { this.fbg=null; for(i=0;i<n;i++) this.flum[i]=this.cells[i]?this.cells[i].l:.5; }
+};
+Tile.prototype.finDraw=function(T){
+  var x=this.ctx, d=this.dpr||1, f=this.fin, cs=this.cs, L=F.lay; if(!x||!cs||!f||!L) return;
+  if(!this.flum||this.flum.length!==this.cells.length) this.finPrep();
+  var D=hex(C.forest), Lc=hex(C.cream), lum=this.flum, rep=F.replay;
+  x.setTransform(1,0,0,1,0,0); x.clearRect(0,0,this.cv.width,this.cv.height);
+  if((rep||T>=HOLD-40)&&this.fbg) x.drawImage(this.fbg,0,0);
+  x.setTransform(d,0,0,d,0,0); x.globalAlpha=.95;
+  this.cells.forEach(function(c,i){
+    var acc=c.acc&&c.jit<.55; // about 2% of tesserae carry the amber accent
+    var dist=Math.hypot(f.vx+c.u*f.vw-L.O[0],f.vy+c.v*f.vh-L.O[1])/L.md;
+    var a=clamp((T-dist*GATHER-c.jit*120)/340), b=clamp((T-HOLD-dist*SPREAD-c.jit*220-(acc?520:0))/440);
+    var p0=rep?0:1-c.val, s=(p0+(1-p0)*ease(a))*(1-ease(b)); if(s<=.02) return; // gathers from whatever the tile showed
+    var w=cs*s, cx=c.x+cs/2, cy=c.y+cs/2;
+    x.fillStyle=acc?C.gold:mix(D,Lc,lum[i]==null?.5:lum[i]); x.fillRect(cx-w/2+.5,cy-w/2+.5,w-1,w-1);
+  });
+  x.globalAlpha=1; this.box.dataset.fin=T>=FIN_END?"done":T<HOLD?"gather":"reveal";
+};
+var FIN_END=HOLD+SPREAD+220+520+440+60;
+function drawAll(){live.forEach(function(t){if(t.fin)t.draw()});}
+// The note above the grid keeps its space from the start, so nothing shifts when it fades in.
+function note(mode){
+  var el=document.getElementById("fin"); F.note=mode; if(!el) return;
+  // reserve: space kept, invisible · show: fading in while the picture resolves · on: settled, Replay enabled
+  el.hidden=mode==="off"; el.classList.toggle("on",mode==="on"||mode==="show"); el.setAttribute("aria-hidden",mode==="on"?"false":"true");
+  var b=el.querySelector("#fin-replay"); if(b) b.disabled=mode!=="on"; el.dataset.mode=mode;
+}
+function finish(){F.state="done";F.raf=0;F.replay=false;drawAll();note("on");var g=document.getElementById("cards");if(g)g.dataset.fin="done";
+  if(!DEMO&&F.complete) ss.set(true); F.played=true;}
+function play(again){
+  if(!live.length) return;
+  F.pending=false; cancelAnimationFrame(F.raf); F.replay=!!again&&F.state==="done";
+  aerial(function(){
+    layout(); live.forEach(function(t){t.finPrep();});
+    var g=document.getElementById("cards"); if(g) g.dataset.fin="playing";
+    note(F.replay?"show":"reserve");
+    if(rm()){ // reduced motion: straight to the final view, with a gentle fade
+      live.forEach(function(t){t.cv.style.transition="none";t.cv.style.opacity="0";});
+      finish(); void document.body.offsetWidth;
+      live.forEach(function(t){t.cv.style.transition="opacity .6s ease";t.cv.style.opacity="1";});
+      return;
+    }
+    live.forEach(function(t){t.cv.style.transition="";t.cv.style.opacity="";});
+    F.state="play"; F.t0=performance.now();
+    F.raf=requestAnimationFrame(function step(ts){var T=ts-F.t0; drawAll(); if(T>=HOLD+SPREAD*.4&&F.note!=="show"){F.note="show";note("show");}
+      if(T<FIN_END) F.raf=requestAnimationFrame(step); else finish();});
+  });
+}
+function whenVisible(fn){
+  if(F.io) F.io.disconnect();
+  var first=live[0]&&live[0].box; if(!first||!window.IntersectionObserver){fn();return;}
+  F.io=new IntersectionObserver(function(es){if(es.some(function(e){return e.isIntersecting&&e.intersectionRatio>=.5})){F.io.disconnect();F.io=null;fn();}},{threshold:[0,.5]});
+  F.io.observe(first);
+}
+function ensureNote(root){
+  if(document.getElementById("fin")||!root) return;
+  var el=document.createElement("div"); el.id="fin"; el.className="fin"; el.hidden=true; el.setAttribute("role","status");
+  el.innerHTML='<div class="fin-txt"><p class="eyebrow">All seven Moments shared</p><h3>Every Moment, one view of AMBAR.</h3>'+
+    '<p class="fin-sub">Seven tiles, one picture: the AMBAR Orlando residences, taking shape from everything you shared.'+(DEMO?' <span class="fin-demo">Preview only. Your saved answers are unchanged.</span>':'')+'</p></div>'+
+    '<div class="fin-act"><button type="button" class="btn ghost sm" id="fin-replay">Replay</button><button type="button" class="btn link sm" id="fin-sum">See Your Orlando on one page</button></div>';
+  root.parentNode.insertBefore(el,root);
+  el.querySelector("#fin-replay").addEventListener("click",function(){play(true);});
+  el.querySelector("#fin-sum").addEventListener("click",function(){var s=document.querySelector(".summary");if(s)s.scrollIntoView({behavior:rm()?"auto":"smooth",block:"start"});});
+}
+// Called after every tiles mount. complete = all seven shared in stored answers.
+function sync(root,complete){
+  F.complete=!!complete;
+  var on=F.complete||DEMO;
+  if(!F.complete&&!DEMO){ss.set(false);F.played=false;}
+  cancelAnimationFrame(F.raf); F.raf=0; if(F.io){F.io.disconnect();F.io=null;}
+  if(!on){F.state="idle";note("off");var g=document.getElementById("cards");if(g)delete g.dataset.fin;return;}
+  ensureNote(root);
+  F.state="idle"; note("reserve");
+  if(document.body.classList.contains("lock")){F.pending=true;return;} // a Moment is still open; play once it closes
+  // wait for the tiles' first layout (ResizeObserver) before measuring
+  requestAnimationFrame(function(){requestAnimationFrame(function(){ aerial(function(){
+    if(F.played||(!DEMO&&ss.get())){layout();live.forEach(function(t){t.finPrep();});finish();}
+    else whenVisible(function(){play();});
+  });});});
+}
+var rz=0; window.addEventListener("resize",function(){clearTimeout(rz);rz=setTimeout(function(){if(F.state!=="idle"){layout();live.forEach(function(t){t.flum=null;});drawAll();}},120);});
+
+function mount(root,complete){
   live=[]; if(io) io.disconnect();
   (root||document).querySelectorAll(".c-img[data-tile]").forEach(function(box){
     var card=box.closest(".card"), t=new Tile(box); box._mo=t; live.push(t);
@@ -132,6 +271,7 @@ function mount(root){
     card.addEventListener("focusin",function(){if(t.ok)t.to("open");});
     card.addEventListener("focusout",function(e){if(t.ok&&!card.contains(e.relatedTarget))t.to("rest");});
   });
+  sync(root||document.getElementById("cards"),complete);
 }
-window.MoTiles={roll:roll,mount:mount,tiles:function(){return live}};
+window.MoTiles={roll:roll,mount:mount,tiles:function(){return live},finale:{play:play,state:function(){return F.state},t0:function(){return F.t0},demo:DEMO}};
 })();

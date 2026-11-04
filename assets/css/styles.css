@@ -247,3 +247,18 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible{
 .card.static .c-open{color:#4b4b40;font-weight:400}
 @media(prefers-reduced-motion:reduce){.card,.c-img img{transition:none!important}.card:hover,.card:focus-visible{transform:none}}
 .cards noscript{display:contents}
+
+/* ---- completion view: all seven Moments shared (tiles.js) ---- */
+.fin{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 24px;padding:34px 0 0;opacity:0;transition:opacity .8s ease}
+.fin.on{opacity:1}
+.fin[hidden]{display:none}
+.fin-txt{max-width:640px}
+.fin h3{font-size:clamp(1.6rem,3vw,2.2rem)}
+.fin-sub{margin:6px 0 0;color:#4b4b40;font-size:.93rem}
+.fin-demo{display:inline-block;margin-left:4px;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--brown)}
+.fin-act{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.fin-act .btn{min-height:44px}
+.fin-act .btn[disabled]{opacity:.45;cursor:default}
+.fin+.cards{padding-top:22px}
+@media(max-width:760px){.fin{padding-top:24px}.fin-act{width:100%}.fin-act .btn{flex:1}}
+@media(prefers-reduced-motion:reduce){.fin{transition:opacity .4s linear}}
